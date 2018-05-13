@@ -6,6 +6,7 @@ Automatic CDN and bogon IP list updater for firewall and server configurations
 * Downloads bogon IP lists to blacklist in firewalls
 * Downloads CDN/trusted proxy/reverse proxy IP ranges to whitelist in firewalls, update server configurations
 * Supports Ipset/Iptables mode, Nginx ngx_http_realip_module, Apache mod_remoteip module, raw mode (for any firewall, server or daemon)
+* Supports many input files with "IP address/netmask" format including raw IP lists, jsonp, xml, etc...
 * Downloads multiple lists and merge
 * IP address and list validation just in case
 * Compatible with any daemon, server or firewall
@@ -90,11 +91,11 @@ Doing some magic with bash and raw list. /etc/myscript.sh contents:
 
 This example demonstrates how to whitelist your CDN/reverse proxy IP range through ipset and iptables.
 
-Create a whitelist set, create iptables rule to accept whitelist set for http/https ports, add Cloudflare IPv4 range to whitelist set.
+Create a proxylist set, create iptables rule to accept proxylist set for http/https ports, add Cloudflare IPv4 range to proxylist set.
 
-	$ ipset create whitelist hash:net family inet hashsize 1024 maxelem 131072
-	$ iptables -I INPUT -p tcp -m multiport --dports 80,443 -m set --match-set whitelist src -j ACCEPT
-	$ ip-list-updater.php --update --mode="ipset" --setname="whitelist" --ipv=4 --output="/etc/whitelist.txt" --sources="cloudflare"
+	$ ipset create proxylist hash:net family inet hashsize 1024 maxelem 131072
+	$ iptables -I INPUT -p tcp -m multiport --dports 80,443 -m set --match-set proxylist src -j ACCEPT
+	$ ip-list-updater.php --update --mode="ipset" --setname="proxylist" --ipv=4 --output="/etc/proxylist.txt" --sources="cloudflare"
 
 This example demonstrates how to block a bogonlist through ipset and iptables.
 
@@ -138,7 +139,17 @@ Update ip list and create Apache (module mod_remoteip) trusted proxy list file t
 Make sure Apache reload success command is correct which may be OS specific.
 
 	$ ip-list-updater.php --update --mode="apache" --ipv=4 --output="/etc/apache-cloudflare.lst" --sources="cloudflare" --success="apachectl -k graceful"
-	
+
+### Examples (A real world example !!!)
+
+In the following crontab entries, the first line downloads Spamhaus bogon IPv4 list daily at 03:15 AM, updates Ipset named "bogonlist", which is used by dtables (my firewall script), and only logs error output. [dtables](https://github.com/vkucukcakar/dtables)
+The second line downloads the Cloudflare IPv4 range, updates Ipset named "proxylist", which is used by the firewall. (There should be another line if we had IPv6 set support as IPv4 sets are not compatible with IPv6 sets.)
+The third line downloads the Cloudflare IP range, updates the server configuration and reloads Nginx with zero downtime by sending a HUP signal to the container by Docker.
+
+15 3 * * * root /usr/local/bin/ip-list-updater.php --update --mode="ipset" --setname="bogonlist" --ipv=4 --output="/etc/bogonlist.txt" --sources="spamhaus" --success="ipset save bogonlist -f /etc/dtables/data/bogonlist.save" >/dev/null 2>/var/log/ip-list-updater.log
+45 3 * * * root /usr/local/bin/ip-list-updater.php --update --mode="ipset" --setname="proxylist" --ipv=4 --output="/etc/proxylist.txt" --sources="cloudflare" --success="ipset save proxylist -f /etc/dtables/data/proxylist.save" >/dev/null 2>/var/log/ip-list-updater.log
+30 3 * * * root /usr/local/bin/ip-list-updater.php --update --mode="nginx" --ipv=all --output="/lemp/configurations/cdn.conf" --sources="cloudflare" --success="docker kill --signal=HUP server-proxy" >/dev/null 2>/var/log/ip-list-updater.log
+
 ## Caveats
 
 * In ipset mode, IPv4 and IPv6 sets have different structure and must be handled on separate lines with --ipv parameter.

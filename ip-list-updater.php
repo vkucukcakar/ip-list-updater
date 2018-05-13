@@ -26,11 +26,13 @@ class ip_list_updater {
 	// Short name
 	private static $app_name = "ip-list-updater";
 	// Version
-	private static $app_version = "1.0.0";
+	private static $app_version = "1.1.0";
 	// Description
 	private static $app_description = "Automatic CDN and bogon IP list updater for firewall and server configurations";
+	/*
 	// PID file
 	private static $pid_file = "/var/run/ip-list-updater.pid";
+	*/
 	// URLs of some pre-defined sources of bogon IP lists and CDN IP ranges
 	public static $pd_sources = array(
 
@@ -92,9 +94,11 @@ class ip_list_updater {
 	/*
 	* Shutdown callback
 	*/
+	/*
 	static function shutdown() {
 		unlink( self::$pid_file );
 	}// function
+	*/
 
 	/*
 	* Custom error exit function that writes error string to STDERR and exits with 1
@@ -197,7 +201,7 @@ class ip_list_updater {
 		// Read old list from file
 		$old_list = @file_get_contents( self::$output );
 		// Check current output file data to avoid overwriting arbitrary files or configuration data
-		if ( false !== $old_list && !preg_match( '~(?:^\s*### ip-list-updater ###|^[\s\d\.:/]*$)~is', $old_list ) ){
+		if ( false !== $old_list && !preg_match( '~(?:^\s*### ip-list-updater ###|^[\s\d\.:/a-f]*$)~is', $old_list ) ){
 			self::error( "Error: Current output file contains unknown data. Please clear or delete output file after checking to avoid overwriting arbitrary files or configuration data.\n" );
 		}
 		// Replace keywords with real urls of pre-defined sources
@@ -482,6 +486,12 @@ class ip_list_updater {
 		if ( version_compare( PHP_VERSION, '5.3.0', '<' ) ) {
 			self::error( "Error: This application requires PHP 5.3.0 or later to run. PHP " . PHP_VERSION . " found. Please update PHP-CLI.\n" );
 		}
+		/*
+		* Single instance check that I have implemented in predecessors of ip-list-updater is no longer required
+		* as memory consumption is slightly decreased after some optimizations in array usage
+		* and it also has disadvantages because of the multiple mode nature of the new script.
+		*/
+		/*
 		// Single instance check
 		$pid = @file_get_contents( self::$pid_file );
 		if ( false !== $pid ) {
@@ -496,6 +506,7 @@ class ip_list_updater {
 		}
 		file_put_contents( self::$pid_file, getmypid() );
 		register_shutdown_function( array( __CLASS__, 'shutdown' ) );
+		*/
 		// Load "openssl" required for file_get_contents() from "https"
 		if ( ( !extension_loaded( 'openssl' ) ) && ( function_exists( 'dl' ) ) ) {
 			dl( 'openssl.so' );
