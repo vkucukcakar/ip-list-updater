@@ -146,9 +146,9 @@ In the following crontab entries, the first line downloads Spamhaus bogon IPv4 l
 The second line downloads the Cloudflare IPv4 range, updates Ipset named "proxylist", which is used by the firewall. (There should be another line if we had IPv6 set support as IPv4 sets are not compatible with IPv6 sets.)
 The third line downloads the Cloudflare IP range, updates the server configuration and reloads Nginx with zero downtime by sending a HUP signal to the container by Docker.
 
-15 3 * * * root /usr/local/bin/ip-list-updater.php --update --mode="ipset" --setname="bogonlist" --ipv=4 --output="/etc/bogonlist.txt" --sources="spamhaus" --success="ipset save bogonlist -f /etc/sptables/data/bogonlist.save" >/dev/null 2>/var/log/ip-list-updater.log
-45 3 * * * root /usr/local/bin/ip-list-updater.php --update --mode="ipset" --setname="proxylist" --ipv=4 --output="/etc/proxylist.txt" --sources="cloudflare" --success="ipset save proxylist -f /etc/sptables/data/proxylist.save" >/dev/null 2>/var/log/ip-list-updater.log
-30 3 * * * root /usr/local/bin/ip-list-updater.php --update --mode="nginx" --ipv=all --output="/lemp/configurations/cdn.conf" --sources="cloudflare" --success="docker kill --signal=HUP server-proxy" >/dev/null 2>/var/log/ip-list-updater.log
+	15 3 * * * root /usr/local/bin/ip-list-updater.php --update --mode="ipset" --setname="bogonlist" --ipv=4 --output="/etc/bogonlist.txt" --sources="spamhaus" --success="ipset save bogonlist -f /etc/sptables/data/bogonlist.save" >/dev/null 2>/var/log/ip-list-updater.log
+	45 3 * * * root /usr/local/bin/ip-list-updater.php --update --mode="ipset" --setname="proxylist" --ipv=4 --output="/etc/proxylist.txt" --sources="cloudflare" --success="ipset save proxylist -f /etc/sptables/data/proxylist.save" >/dev/null 2>/var/log/ip-list-updater.log
+	30 3 * * * root /usr/local/bin/ip-list-updater.php --update --mode="nginx" --ipv=all --output="/lemp/configurations/cdn.conf" --sources="cloudflare" --success="docker kill --signal=HUP server-proxy" >/dev/null 2>/var/log/ip-list-updater.log
 
 ## Caveats
 
