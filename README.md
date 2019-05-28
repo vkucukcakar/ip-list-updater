@@ -143,7 +143,9 @@ Make sure Apache reload success command is correct which may be OS specific.
 ### Examples (A real world example !!!)
 
 In the following crontab entries, the first line downloads Spamhaus bogon IPv4 list daily at 03:15 AM, updates Ipset named "bogonlist", which is used by sptables (my firewall script), and only logs error output. [sptables](https://github.com/vkucukcakar/sptables)
+
 The second line downloads the Cloudflare IPv4 range, updates Ipset named "proxylist", which is used by the firewall. (There should be another line if we had IPv6 set support as IPv4 sets are not compatible with IPv6 sets.)
+
 The third line downloads the Cloudflare IP range, updates the server configuration and reloads Nginx with zero downtime by sending a HUP signal to the container by Docker.
 
 	15 3 * * * root /usr/local/bin/ip-list-updater.php --update --mode="ipset" --setname="bogonlist" --ipv=4 --output="/etc/bogonlist.txt" --sources="spamhaus" --success="ipset save bogonlist -f /etc/sptables/data/bogonlist.save" >/dev/null 2>/var/log/ip-list-updater.log
