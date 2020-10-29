@@ -22,17 +22,16 @@ Automatic CDN and bogon IP list updater for firewall and server configurations
 * Install PHP-CLI with openssl extension if not installed (OS dependent)
 	
 * Install ip-list-updater.php to an appropriate location and give execute permission
-
+```
 	$ cd /usr/local/src/
-
 	$ git clone https://github.com/vkucukcakar/ip-list-updater.git	
-
 	$ cp ip-list-updater/ip-list-updater.php /usr/local/bin/
-	
-* Give execute permission if not cloned from github
+```
 
+* Give execute permission if not cloned from github
+```
 	$ chmod +x /usr/local/bin/ip-list-updater.php
-	
+```	
 
 ## Usage
 
@@ -72,55 +71,56 @@ Available options:
 ### Examples (raw mode)
 
 Short command syntax usage.
-
+```
 	$ ip-list-updater.php -u -m raw -x 4 -o "/etc/ip-list-updater.txt" -s "cloudflare" -c "/etc/myscript.sh"
-	
+```	
 Long command syntax usage.
-	
+```	
 	$ ip-list-updater.php --update --mode="raw" --ipv=4 --output="/etc/ip-list-updater.txt" --sources="https://www.cloudflare.com/ips-v4" --success="/etc/myscript.sh"
-
+```
 	
 Doing some magic with bash and raw list. /etc/myscript.sh contents:	
-	
+```	
 	#!/usr/bin/env bash
 	for IP in $(cat /etc/ip-list-updater.txt); do
 		echo $IP
 	done
+```
 	
 ### Examples (ipset mode)
 
 This example demonstrates how to allow your CDN/reverse proxy IP range through ipset and iptables.
 
 Create a proxylist set, create iptables rule to accept proxylist set for http/https ports, add Cloudflare IPv4 range to proxylist set.
-
+```
 	$ ipset create proxylist hash:net family inet hashsize 1024 maxelem 131072
 	$ iptables -I INPUT -p tcp -m multiport --dports 80,443 -m set --match-set proxylist src -j ACCEPT
 	$ ip-list-updater.php --update --mode="ipset" --setname="proxylist" --ipv=4 --output="/etc/proxylist.txt" --sources="cloudflare"
-
+```
 This example demonstrates how to block a bogonlist through ipset and iptables.
 
 Create a bogonlist set, create iptables rule to drop bogonlist set, add Spamhaus IPv4 list to bogonlist set. 	
-	
+```	
 	$ ipset create bogonlist hash:net family inet hashsize 1024 maxelem 131072
 	$ iptables -I INPUT -m set --match-set bogonlist src -j DROP
 	$ ip-list-updater.php --update --mode="ipset" --setname="bogonlist" --ipv=4 --output="/etc/bogonlist.txt" --sources="spamhaus"
-
+```
 ### Examples (nginx mode)
 
 This example demonstrates how to make Nginx show correct connnecting IP via ngx_http_realip_module on a reverse proxy/CDN setup. 
 
 Add the following to Nginx main configuration file.
-
+```
 	#real_ip_header X-Real-IP;
 	#real_ip_header X-Forwarded-For;
 	real_ip_header CF-Connecting-IP;
 	include /etc/nginx-cloudflare.conf;
-
+```
 Update ip list and create Nginx (module ngx_http_realip_module) configuration file to be included. 
 Success command will make Nginx reload configuration files without interruption. Make sure nginx path is correct at the success command.
-
+```
 	$ ip-list-updater.php --update --mode="nginx" --ipv=4 --output="/etc/nginx-cloudflare.conf" --sources="cloudflare" --success="/usr/bin/nginx -s reload"
-
+```
 For Cloudflare, both CF-Connecting-IP and X-Forwarded-For can be used. Please refer to your CDN's documentation for the correct header.
 	
 ### Examples (apache mode)
@@ -128,17 +128,18 @@ For Cloudflare, both CF-Connecting-IP and X-Forwarded-For can be used. Please re
 This example demonstrates how to make Apache show correct connnecting IP via mod_remoteip on a reverse proxy/CDN setup. 
 
 Modify the relevant section in Apache configuration file.
-
+```
 	<IfModule mod_remoteip.c>
 		#RemoteIPHeader X-Forwarded-For
 		RemoteIPHeader CF-Connecting-IP
 		RemoteIPInternalProxyList /etc/apache-cloudflare.lst
 	</IfModule>
-
+```
 Update ip list and create Apache (module mod_remoteip) trusted proxy list file to be included. 
 Make sure Apache reload success command is correct which may be OS specific.
-
+```
 	$ ip-list-updater.php --update --mode="apache" --ipv=4 --output="/etc/apache-cloudflare.lst" --sources="cloudflare" --success="apachectl -k graceful"
+```
 
 ### Examples (A real world example !!!)
 
@@ -148,9 +149,11 @@ The second line downloads the Cloudflare IPv4 range, updates Ipset named "proxyl
 
 The third line downloads the Cloudflare IP range, updates the server configuration and reloads Nginx with zero downtime by sending a HUP signal to the container by Docker.
 
+```
 	15 3 * * * root /usr/local/bin/ip-list-updater.php --update --mode="ipset" --setname="bogonlist" --ipv=4 --output="/etc/bogonlist.txt" --sources="spamhaus" --success="ipset save bogonlist -f /etc/sptables/data/bogonlist.save" >/dev/null 2>/var/log/ip-list-updater.log
 	45 3 * * * root /usr/local/bin/ip-list-updater.php --update --mode="ipset" --setname="proxylist" --ipv=4 --output="/etc/proxylist.txt" --sources="cloudflare" --success="ipset save proxylist -f /etc/sptables/data/proxylist.save" >/dev/null 2>/var/log/ip-list-updater.log
 	30 3 * * * root /usr/local/bin/ip-list-updater.php --update --mode="nginx" --ipv=all --output="/lemp/configurations/cdn.conf" --sources="cloudflare" --success="docker kill --signal=HUP server-proxy" >/dev/null 2>/var/log/ip-list-updater.log
+```
 
 ## Caveats
 
