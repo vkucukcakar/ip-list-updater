@@ -161,7 +161,7 @@ class ip_list_updater {
 				. "\$ " . self::$app_name . ".php -u -m raw -x 4 -o \"/etc/ip-list-updater.txt\" -s \"cloudflare\" -c \"/etc/myscript.sh\" \n"
 				. "\$ " . self::$app_name . ".php --update --mode=\"raw\" --ipv=4 --output=\"/etc/ip-list-updater.txt\" --sources=\"https://www.cloudflare.com/ips-v4\" --success=\"/etc/myscript.sh\"\n"
 				. "\nExamples (ipset mode):\n"
-				. "\$ " . self::$app_name . ".php --update --mode=\"ipset\" --setname=\"whitelist\" --ipv=4 --output=\"/etc/whitelist.txt\" --sources=\"cloudflare\"\n"
+				. "\$ " . self::$app_name . ".php --update --mode=\"ipset\" --setname=\"allowlist\" --ipv=4 --output=\"/etc/allowlist.txt\" --sources=\"cloudflare\"\n"
 				. "\$ " . self::$app_name . ".php --update --mode=\"ipset\" --setname=\"bogonlist\" --ipv=4 --output=\"/etc/bogonlist.txt\" --sources=\"spamhaus\"\n"
 				. "\nExamples (nginx mode):\n"
 				. "\$ " . self::$app_name . ".php --update --mode=\"nginx\" --ipv=4 --output=\"/etc/nginx-cloudflare.conf\" --sources=\"cloudflare\" --success=\"/usr/bin/nginx -s reload\"\n"

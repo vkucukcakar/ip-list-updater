@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.1.1
+
+- Removed the words "whitelist", "blacklist" from examples in code and readme
+
+
 ## v1.1.0
 
 - Removed single instance check

@@ -3,8 +3,8 @@
 Automatic CDN and bogon IP list updater for firewall and server configurations
 
 * Downloads IP lists to update firewall and server configurations
-* Downloads bogon IP lists to blacklist in firewalls
-* Downloads CDN/trusted proxy/reverse proxy IP ranges to whitelist in firewalls, update server configurations
+* Downloads bogon IP lists to block by firewalls
+* Downloads CDN/trusted proxy/reverse proxy IP ranges to allow in firewalls, update server configurations
 * Supports Ipset/Iptables mode, Nginx ngx_http_realip_module, Apache mod_remoteip module, raw mode (for any firewall, server or daemon)
 * Supports many input files with "IP address/netmask" format including raw IP lists, jsonp, xml, etc...
 * Downloads multiple lists and merge
@@ -89,7 +89,7 @@ Doing some magic with bash and raw list. /etc/myscript.sh contents:
 	
 ### Examples (ipset mode)
 
-This example demonstrates how to whitelist your CDN/reverse proxy IP range through ipset and iptables.
+This example demonstrates how to allow your CDN/reverse proxy IP range through ipset and iptables.
 
 Create a proxylist set, create iptables rule to accept proxylist set for http/https ports, add Cloudflare IPv4 range to proxylist set.
 
